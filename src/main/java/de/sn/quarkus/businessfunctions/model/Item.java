@@ -7,6 +7,7 @@ import javax.persistence.FetchType;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import io.quarkus.hibernate.orm.panache.PanacheEntity;
+import io.quarkus.panache.common.Parameters;
 import io.quarkus.panache.common.Sort;
 
 @Entity
@@ -34,7 +35,9 @@ public class Item extends PanacheEntity{
     //@JsonbTransient - relevant for JSON Marshalling later
     public Item item; 
 	
-	public static List<Item> findByLevel(Integer level){
-        return list("level", Sort.by("name"), level);
-    }
+	//Customized queries...
+	public static List<Item> findByLevelAndProjectId(Integer level, Long projectid){
+		 return list("level = :level and project.id = :projectid",
+	         Parameters.with("level", level).and("projectid", projectid));
+	}
 }

@@ -7,8 +7,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.List;
 
-import javax.inject.Inject;
-import javax.persistence.EntityManager;
 import javax.transaction.Transactional;
 
 import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
@@ -16,9 +14,11 @@ import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 
+import de.sn.quarkus.businessfunctions.model.Item;
 import de.sn.quarkus.businessfunctions.model.Project;
 import io.quarkus.hibernate.orm.panache.PanacheQuery;
 import io.quarkus.panache.common.Page;
+import io.quarkus.panache.common.Sort;
 import io.quarkus.test.junit.QuarkusTest;
 
 @QuarkusTest
@@ -30,7 +30,7 @@ public class BFTest {
 	@Test
 	@Transactional
 	@Order(1)
-	public void testPanacheEntityList() {
+	public void testProjectList() {
 		//Check preloaded data
 		List<Project> listProjects = Project.listAll();
 		assertEquals("Test Projekt",listProjects.get(0).name);	
@@ -53,7 +53,7 @@ public class BFTest {
 	@Test
 	@Transactional
 	@Order(2)
-	public void testPanacheAddNewRecordAndFindByNameLike() {
+	public void testProjectAddNewRecordAndFindByNameLike() {
 		//Add new record
 		Project newProject = new Project();
 		newProject.id= null;
@@ -69,7 +69,7 @@ public class BFTest {
 	@Test
 	@Transactional
 	@Order(3)
-	public void testPanacheFindAllRecordsWithPaging() {
+	public void testProjectFindAllRecordsWithPaging() {
 		//Find all records with paging
 		PanacheQuery<Project> pagedProjectList = Project.findAll();
 		// make it use pages of 25 entries at a time
@@ -86,7 +86,7 @@ public class BFTest {
 	@Test
 	@Transactional
 	@Order(4)
-	public void testPanacheUpdateRecord() {
+	public void testProjectUpdateRecord() {
 		//Find first locomotive with certain address
 		Project myProject =  Project.findById(BFTest.identifier);
 	    myProject.name="UpdatedName";
@@ -98,11 +98,60 @@ public class BFTest {
 	@Test
 	@Transactional
 	@Order(5)
-	public void testPanacheDeleteRecord() {
+	public void testProjectDeleteRecord() {
 		Project.deleteById(BFTest.identifier);
 		Project deletedProject = Project.findById(BFTest.identifier);
 		assertEquals(null, deletedProject);
 	}
+	
+	@Test
+	@Transactional
+	@Order(10)
+	public void testItemList() {
+		//Check preloaded data
+		List<Item> listItems = Item.listAll();
+		Item.listAll(Sort.by("level"));
+		assertEquals("main",listItems.get(0).name);	
+	}
+	
+	@Test
+	@Transactional
+	@Order(11)
+	public void testCreateAndFindItemByLevelAndProjectId() {
+		Item newItem = new Item();
+		newItem.project = new Project();
+		newItem.project.id = 2L;
+		newItem.name = "main";
+		newItem.level = 0;
+		newItem.imageURL = "main.jpg";
+		newItem.persist();
+				
+		List<Item> itemList = Item.findByLevelAndProjectId(0, 2L);
+		assertEquals("main", itemList.get(0).name);
+		BFTest.identifier = itemList.get(0).id;
+	}
+	
+	@Test
+	@Transactional
+	@Order(12)
+	public void testItemUpdateRecord() {
+		//Find first locomotive with certain address
+		Item item =  Item.findById(BFTest.identifier);
+	    item.name="UpdatedName";
+		item.persist();
+	    Item updatedItem = Item.findById(BFTest.identifier);
+		assertEquals("UpdatedName", updatedItem.name);
+	}
+	
+	@Test
+	@Transactional
+	@Order(13)
+	public void testItemDeleteRecord() {
+		Item.deleteById(BFTest.identifier);
+		Item deletedItem = Item.findById(BFTest.identifier);
+		assertEquals(null, deletedItem);
+	}
+	
 	@Test
     public void testHelloEndpoint() {
         given()
@@ -111,5 +160,4 @@ public class BFTest {
              .statusCode(200)
              .body(is("hello"));
     }
-
 }
