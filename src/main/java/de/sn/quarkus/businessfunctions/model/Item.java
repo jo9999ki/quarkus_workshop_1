@@ -1,14 +1,15 @@
 package de.sn.quarkus.businessfunctions.model;
 import java.util.List;
+
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+
 import io.quarkus.hibernate.orm.panache.PanacheEntity;
 import io.quarkus.panache.common.Parameters;
-import io.quarkus.panache.common.Sort;
 
 @Entity
 public class Item extends PanacheEntity{
@@ -24,7 +25,7 @@ public class Item extends PanacheEntity{
 
 	//Projects containing items
 	@ManyToOne
-	//@JsonbTransient - relevant for JSON Marshalling later
+	//@JsonbTransient
 	public Project project; 
 	//Lower items in hierarchy
 	@OneToMany(mappedBy = "item", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
@@ -32,12 +33,16 @@ public class Item extends PanacheEntity{
 	
 	//Higher item in hierarchy
 	@ManyToOne
-    //@JsonbTransient - relevant for JSON Marshalling later
+    //@JsonbTransient
     public Item item; 
 	
 	//Customized queries...
 	public static List<Item> findByLevelAndProjectId(Integer level, Long projectid){
 		 return list("level = :level and project.id = :projectid",
 	         Parameters.with("level", level).and("projectid", projectid));
+	}
+	
+	public static List<Item> findByProjectId(Long projectid){
+		 return list("project.id", projectid);
 	}
 }
