@@ -126,7 +126,7 @@ public class BFTest {
 		newItem.imageURL = "main.jpg";
 		newItem.persist();
 				
-		List<Item> itemList = Item.findByLevelAndProjectId(0, 2L);
+		List<Item> itemList = Item.findByLevelAndProjectId(0, 2L).list();
 		assertEquals("main", itemList.get(0).name);
 		BFTest.identifier = itemList.get(0).id;
 	}
